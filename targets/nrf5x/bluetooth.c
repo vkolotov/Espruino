@@ -811,7 +811,8 @@ void nus_transmit_string() {
    * in one connection interval on nRF52. Try and
    * send 5 just to allow an extra TX from user
    * code if needed. */
-  for (int packet=0;packet<5;packet++) {
+  // for (int packet=0;packet<5;packet++) {
+  if (!(bleStatus & BLE_IS_SENDING)) { // send just one packet per interval
     // No data? try and get some from our queue
     if (!nuxTxBufLength) {
       nuxTxBufLength = 0;
