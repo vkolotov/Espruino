@@ -416,6 +416,19 @@ void jshKickWatchDog() {
   jsError(">> jshKickWatchDog Not implemented,using taskwatchdog from RTOS");
 }
 
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  if (!jshIsPinValid(pin) || pin>=32) return false;
+  // not tested
+  uint32_t mask = 1 << pin;
+  address->setAddress = &GPIO.out_w1ts;
+  address->setMask = mask;
+  address->clearAddress = &GPIO.out_w1tc;
+  address->clearMask = mask;
+  address->inAddress = &GPIO.in;
+  address->inMask = mask;
+  return true;
+}
+
 
 /**
  * Get the state of the pin associated with the event flag.

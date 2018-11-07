@@ -43,3 +43,23 @@ void jshI2CInitInfo(JshI2CInfo *inf) {
   inf->bitrate = 100000;
   inf->started = false;
 }
+
+/// Get a Pin address that writes to a safe (but useless) place (in jshardware_common.c)
+void jshGetSafePinAddress(JshPinAddress *address) {
+  static uint32_t aSafePlace;
+  address->setAddress = &aSafePlace;
+  address->setMask = 0;
+  address->clearAddress = &aSafePlace;
+  address->clearMask = 0;
+  address->inAddress = &aSafePlace;
+  address->inMask = 0;
+}
+/// Invert writes by swapping set/clear addresses (in jshardware_common.c)
+void jshInvertPinAddress(JshPinAddress *address) {
+  uint32_t *ta = address->setAddress;
+  address->setAddress = address->clearAddress;
+  address->clearAddress = ta;
+  uint32_t tm = address->setMask;
+  address->setMask = address->clearMask;
+  address->clearMask = tm;
+}

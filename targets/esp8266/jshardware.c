@@ -645,6 +645,9 @@ void jshKickWatchDog() {
   os_printf("ESP8266: jshKickWatchDog\n");
 }
 
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  return false;
+}
 
 /**
  * Get the state of the pin associated with the event flag.

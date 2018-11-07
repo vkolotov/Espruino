@@ -442,41 +442,42 @@ JsVar *jswrap_io_getPinMode(Pin pin) {
 typedef struct {
   Pin pins[jswrap_io_shiftOutDataMax];
   Pin clk;
-#ifdef STM32
-  volatile uint32_t *addrs[jswrap_io_shiftOutDataMax];
-  volatile uint32_t *clkAddr;
-#endif
+  JshPinAddress addrs[jswrap_io_shiftOutDataMax];
+  JshPinAddress clkAddr;
   bool clkPol; // clock polarity
 
   int cnt; // number of pins
   int repeat; // iterations to perform per array item
 } jswrap_io_shiftOutData;
 
+void jswrap_io_shiftOutCallbackFast(int val, void *data) {
+  jswrap_io_shiftOutData *d = (jswrap_io_shiftOutData*)data;
+  int n, i;
+  for (i=0;i<d->repeat;i++) {
+    for (n=d->cnt-1; n>=0; n--) {
+      if (val&1)
+        d->addrs[n].setAddress = d->addrs[n].setMask;
+      else
+        d->addrs[n].clearAddress = d->addrs[n].clearMask;
+      val>>=1;
+    }
+    d->clkAddr.setAddress = d->clkAddr.setMask;
+    d->clkAddr.clearAddress = d->clkAddr.clearMask;
+  }
+}
 void jswrap_io_shiftOutCallback(int val, void *data) {
   jswrap_io_shiftOutData *d = (jswrap_io_shiftOutData*)data;
   int n, i;
   for (i=0;i<d->repeat;i++) {
     for (n=d->cnt-1; n>=0; n--) {
-  #ifdef STM32
-      if (d->addrs[n])
-        *d->addrs[n] = val&1;
-  #else
       if (jshIsPinValid(d->pins[n]))
           jshPinSetValue(d->pins[n], val&1);
-  #endif
       val>>=1;
     }
-#ifdef STM32
-    if (d->clkAddr) {
-        *d->clkAddr = d->clkPol;
-        *d->clkAddr = !d->clkPol;
-    }
-#else
     if (jshIsPinValid(d->clk)) {
       jshPinSetValue(d->clk, d->clkPol);
       jshPinSetValue(d->clk, !d->clkPol);
     }
-#endif
   }
 }
 
@@ -563,6 +564,7 @@ void jswrap_io_shiftOut(JsVar *pins, JsVar *options, JsVar *data) {
   }
 
   // Set pins as outputs
+  bool allFast = true;
   int i;
   for (i=0;i<d.cnt;i++) {
     if (jshIsPinValid(d.pins[i])) {
@@ -570,18 +572,17 @@ void jswrap_io_shiftOut(JsVar *pins, JsVar *options, JsVar *data) {
         jshPinSetState(d.pins[i], JSHPINSTATE_GPIO_OUT);
     }
     // on STM32, try and get the pin's output address
-#ifdef STM32
-    d.addrs[i] = jshGetPinAddress(d.pins[i], JSGPAF_OUTPUT);
-#endif
+    allFast &= jshGetPinAddress(d.pins[i], &d.addrs[i]);
   }
-#ifdef STM32
-  d.clkAddr = jshGetPinAddress(d.clk, JSGPAF_OUTPUT);
-#endif
-  if (jshIsPinValid(d.clk))
+  jshGetSafePinAddress(&d.clkAddr);
+  if (jshIsPinValid(d.clk)) {
     jshPinSetState(d.clk, JSHPINSTATE_GPIO_OUT);
-
+    allFast &= jshGetPinAddress(d.clk, &d.clkAddr);
+    if (allFast && !d.clkPol)
+      jshInvertPinAddress(&d.clkAddr);
+  }
   // Now run through the data, pushing it out
-  jsvIterateCallback(data, jswrap_io_shiftOutCallback, &d);
+  jsvIterateCallback(data, allFast ? jswrap_io_shiftOutCallbackFast : jswrap_io_shiftOutCallback, &d);
 }
 
 /*JSON{

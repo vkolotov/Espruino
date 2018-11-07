@@ -830,6 +830,10 @@ void jshEnableWatchDog(JsVarFloat timeout) {
 void jshKickWatchDog() {
 }
 
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  return false;
+}
+
 JsVarFloat jshReadTemperature() { return NAN; };
 JsVarFloat jshReadVRef()  { return NAN; };
 unsigned int jshGetRandomNumber() { return rand(); }

@@ -203,8 +203,12 @@ Get information about this pin and its capabilities. Of the form:
 {
   "port"      : "A", // the Pin's port on the chip
   "num"       : 12, // the Pin's number
-  "in_addr"   : 0x..., // (if available) the address of the pin's input address in bit-banded memory (can be used with peek)
-  "out_addr"  : 0x..., // (if available) the address of the pin's output address in bit-banded memory (can be used with poke)
+  "set_addr"  : 0x..., // (if available) the address of the pin's output address to be written with set_mask to set the pin  (can be used with poke)
+  "set_mask"  : ...
+  "clr_addr"  : 0x..., // (if available) the address of the pin's output address to be written with clr_mask to clear the pin (can be used with poke)
+  "clr_mask"  : ...
+  "in_addr"   : 0x..., // (if available) the address of the pin's input address to be ANDed with in_mask (can be used with peek)
+  "in_mask"   : ...,
   "analog"    : { ADCs : [1], channel : 12 }, // If analog input is available
   "functions" : {
     "TIM1":{type:"CH1, af:0},
@@ -228,13 +232,22 @@ JsVar *jswrap_pin_getInfo(
   buf[1] = 0;
   jsvObjectSetChildAndUnLock(obj, "port", jsvNewFromString(buf));
   jsvObjectSetChildAndUnLock(obj, "num", jsvNewFromInteger(inf->pin-JSH_PIN0));
-#ifdef STM32
-  volatile uint32_t *addr;
-  addr = jshGetPinAddress(pin, JSGPAF_INPUT);
-  if (addr) jsvObjectSetChildAndUnLock(obj, "in_addr", jsvNewFromInteger((JsVarInt)addr));
-  addr = jshGetPinAddress(pin, JSGPAF_OUTPUT);
-  if (addr) jsvObjectSetChildAndUnLock(obj, "out_addr", jsvNewFromInteger((JsVarInt)addr));
-#endif
+  JshPinAddress addr;
+  if (jshGetPinAddress(pin, &addr)) {
+    if (addr.setAddress) {
+      jsvObjectSetChildAndUnLock(obj, "set_addr", jsvNewFromInteger((JsVarInt)addr.setAddress));
+      jsvObjectSetChildAndUnLock(obj, "set_mask", jsvNewFromInteger((JsVarInt)addr.setMask));
+    }
+    if (addr.clearAddress) {
+      jsvObjectSetChildAndUnLock(obj, "clr_addr", jsvNewFromInteger((JsVarInt)addr.clearAddress));
+      jsvObjectSetChildAndUnLock(obj, "clr_mask", jsvNewFromInteger((JsVarInt)addr.clearMask));
+    }
+    // TODO: out address?
+    if (addr.inAddress) {
+      jsvObjectSetChildAndUnLock(obj, "in_addr", jsvNewFromInteger((JsVarInt)addr.inAddress));
+      jsvObjectSetChildAndUnLock(obj, "in_mask", jsvNewFromInteger((JsVarInt)addr.inMask));
+    }
+  }
   // ADC
   if (inf->analog) {
     JsVar *an = jsvNewObject();

@@ -382,14 +382,29 @@ void jshDoSysTick();
 #if defined(STM32) || defined(STM32_LL)
 // push a byte into SPI buffers (called from IRQ)
 void jshSPIPush(IOEventFlags device, uint16_t data);
-
-typedef enum {
-  JSGPAF_INPUT,
-  JSGPAF_OUTPUT,
-} JshGetPinAddressFlags;
-// Get the address to read/write to in order to change the state of this pin. Or 0.
-volatile uint32_t *jshGetPinAddress(Pin pin, JshGetPinAddressFlags flags);
 #endif
+
+/*
+Write 1 -> setAddress = setMask;
+Write 0 -> clearAddress = clearMask
+Read -> getAddress&getMask
+ */
+typedef struct {
+  volatile uint32_t *setAddress;
+  uint32_t setMask;
+  volatile uint32_t *clearAddress;
+  uint32_t clearMask;
+  volatile uint32_t *inAddress;
+  uint32_t inMask;
+} JshPinAddress;
+
+/// Get a Pin address that writes to a safe (but useless) place (in jshardware_common.c)
+void jshGetSafePinAddress(JshPinAddress *address);
+/// Invert writes by swapping set/clear addresses (in jshardware_common.c)
+void jshInvertPinAddress(JshPinAddress *address);
+
+// Get the address and mask to read/write to in order to change or read the state of this pin. Return true on success, false on failure
+bool jshGetPinAddress(Pin pin, JshPinAddress *address);
 
 #if defined(NRF51) || defined(NRF52)
 /// Called when we have had an event that means we should execute JS

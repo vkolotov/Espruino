@@ -2772,18 +2772,17 @@ void jshKickWatchDog() {
   IWDG_ReloadCounter();
 }
 
-volatile uint32_t *jshGetPinAddress(Pin pin, JshGetPinAddressFlags flags) {
-  if (!jshIsPinValid(pin)) return 0;
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  if (!jshIsPinValid(pin)) return false;
+  uint32_t mask = 1 << (uint32_t)(pinInfo[pin].pin - JSH_PIN0);
   GPIO_TypeDef *port = stmPort(pin);
-  volatile uint32_t *regAddr;
-  if (flags == JSGPAF_INPUT)
-    regAddr = &port->IDR;
-  else
-    regAddr = &port->ODR;
-
-  uint32_t addr =  0x42000000 + ((((uint32_t)regAddr)-PERIPH_BASE)<<5) + (((uint32_t)(pinInfo[pin].pin - JSH_PIN0)<<2));
-
-  return (uint32_t*)addr;
+  address->setAddress = &port->BSRR;
+  address->setMask = mask;
+  address->clearAddress = &port->BSRR;
+  address->clearMask = mask << 16;
+  address->inAddress = &port->IDR;
+  address->inMask = mask;
+  return true;
 }
 
 

@@ -357,6 +357,10 @@ void jshEnableWatchDog(JsVarFloat timeout) {
 void jshKickWatchDog() {
 }
 
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  return false;
+}
+
 int jshGetSerialNumber(unsigned char *data, int maxChars) {
 	return 666;
 }

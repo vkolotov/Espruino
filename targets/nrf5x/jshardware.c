@@ -922,6 +922,24 @@ void jshKickWatchDog() {
   NRF_WDT->RR[0] = 0x6E524635;
 }
 
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  if (!jshIsPinValid(pin)) return false;
+  if (pinInfo[pin].port & JSH_PIN_NEGATED) return false; // can negate the write, but not the read
+ #if JSH_PORTV_COUNT>0
+   // handle virtual ports (eg. pins on an IO Expander)
+   if ((pinInfo[pin].port & JSH_PORT_MASK)==JSH_PORTV)  // no fancy way to write virtual pins
+     return false;
+ #endif
+  uint32_t mask = 1 << (uint32_t)(pinInfo[pin].pin - JSH_PIN0);
+  address->setAddress = &NRF_GPIO->OUTSET;
+  address->setMask = mask;
+  address->clearAddress = &NRF_GPIO->OUTCLR;
+  address->clearMask = mask;
+  address->inAddress = &NRF_GPIO->IN;
+  address->inMask = mask;
+  return true;
+}
+
 /** Check the pin associated with this EXTI - return true if it is a 1 */
 bool jshGetWatchedPinState(IOEventFlags device) {
   return lastHandledPinState;

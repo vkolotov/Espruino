@@ -693,6 +693,10 @@ void jshKickWatchDog() {
   /* EFM32 TODO */
 }
 
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  return false;
+}
+
 /** Is the given device initialised? */
 bool jshIsDeviceInitialised(IOEventFlags device) {
   /* EFM32 TODO */

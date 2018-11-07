@@ -2149,8 +2149,8 @@ void jshDoSysTick(){
 
 
 // Get the address to read/write to in order to change the state of this pin. Or 0.
-volatile uint32_t *jshGetPinAddress(Pin pin, JshGetPinAddressFlags flags){
-        return 0;
+bool jshGetPinAddress(Pin pin, JshPinAddress *address) {
+  return false;
 }
 #endif
 
