@@ -22,8 +22,7 @@
 
 /*JSON{
   "type" : "library",
-  "class" : "Storage",
-  "ifndef" : "SAVE_ON_FLASH"
+  "class" : "Storage"
 }
 
 This module allows you to read and write part of the nonvolatile flash
@@ -35,7 +34,6 @@ to access all parts of your flash memory.
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "eraseAll",
   "generate" : "jswrap_storage_eraseAll"
@@ -50,7 +48,6 @@ void jswrap_storage_eraseAll() {
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "erase",
   "generate" : "jswrap_storage_erase",
@@ -66,7 +63,6 @@ void jswrap_storage_erase(JsVar *name) {
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "read",
   "generate" : "jswrap_storage_read",
@@ -91,7 +87,6 @@ JsVar *jswrap_storage_read(JsVar *name) {
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "readJSON",
   "generate" : "jswrap_storage_readJSON",
@@ -116,7 +111,6 @@ JsVar *jswrap_storage_readJSON(JsVar *name) {
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "readArrayBuffer",
   "generate" : "jswrap_storage_readArrayBuffer",
@@ -144,7 +138,6 @@ JsVar *jswrap_storage_readArrayBuffer(JsVar *name) {
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "write",
   "generate" : "jswrap_storage_write",
@@ -199,7 +192,6 @@ bool jswrap_storage_write(JsVar *name, JsVar *data, JsVarInt offset, JsVarInt _s
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "list",
   "generate" : "jswrap_storage_list",
@@ -258,7 +250,6 @@ void jswrap_storage_debug() {
 
 /*JSON{
   "type" : "staticmethod",
-  "ifndef" : "SAVE_ON_FLASH",
   "class" : "Storage",
   "name" : "getFree",
   "generate" : "jswrap_storage_getFree",
